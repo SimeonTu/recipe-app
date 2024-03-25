@@ -5,33 +5,40 @@
 <a href="{% url 'recipes:list' %}" type="button" class="btn btn-primary mb-2"><img src="../../../media/back.svg"
         style="padding-bottom: 2px" width="17px" class="me-1" />Back to recipes</a>
 
-<div style="display: flex; background-color: #ffc17b; border-radius: 15px; padding: 2rem;">
+<div style="display: flex; flex-direction: column; background-color: #ffc17b; border-radius: 15px; padding: 2rem;">
+
     <div>
         <h1 style="font-size: 2.75rem; font-weight: bold; margin-bottom: 1rem;">{{object.name}}</h1>
-
-        <img src="{{object.image.url}}" width="350" />
     </div>
 
-    <div style="display: flex; flex-direction: column; justify-content: center; margin-left: 1rem">
-        <p style="font-size: 1.5rem; margin: 0;">
-            {% if recipe.description != "N/A" %}
-            {{ recipe.description }}
-            {% else %}
-            <span style="opacity: 0.75;">No description available.</span>
-            {% endif %}
-        </p>
+    <div class="d-flex">
 
-        <hr style="margin: 0.5rem 0;" class="bg-primary border-1 border-top border-primary" />
+        <img src="{{object.image.url}}" width="350" height="100%" />
 
-        <div>
-            <img src="../../../media/cooking_time.png" height="20px" /> {{ recipe.cooking_time }} minutes <br>
-            <img src="../../../media/difficulty-bigger.png" height="20px" /> {{ recipe.difficulty }}
+
+        <div style="display: flex; flex-direction: column; justify-content: center; margin-left: 1rem">
+            <p style="font-size: 1.25rem; margin: 0;">
+                {% if recipe.description != "N/A" %}
+                <span>{{ recipe.description }}</span>
+                {% else %}
+                <span style="opacity: 0.75; font-size: 1.5rem;">No description available.</span>
+                {% endif %}
+            </p>
+
+            <hr style="margin: 0.5rem 0;" class="bg-primary border-1 border-top border-primary" />
+
+            <div>
+                <div style="height: 30px;" class="d-flex align-items-end">
+                    <img src="../../../media/cooking_time.png" height="26px" /> <span >
+                        {{ recipe.cooking_time }} minutes</span>
+                </div>
+                <div style="height: 30px;" class="d-flex align-items-center">
+                    <img style="margin: 0 4px 0 2px;" src="../../../media/difficulty-bigger.png" width="22px" /> <span>{{ recipe.difficulty }}</span>
+                </div>
+            </div>
         </div>
+
     </div>
-
-</div>
-
-
 
 </div>
 
@@ -56,7 +63,7 @@
         <ul style="max-width: 500px" class="p-0">
             {% for step in object.steps.all %}
             <li style="font-size: 1.15rem; list-style-type: none;" class="p-1">
-                <h4>Step {{ step.order }}</h4>
+                <h5 class="fw-bold">Step {{ step.order }}</h5>
                 <p style="margin-left: 0.5rem;">
                     {{ step.instructions }}
                 </p>

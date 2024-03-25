@@ -10,7 +10,7 @@ class Recipe(models.Model):
     cooking_time = models.IntegerField(help_text="Time in minutes")
     difficulty = models.CharField(max_length=50, default="TBA")
     image = models.ImageField(upload_to='recipes', default='no_image.jpg')
-    description = models.TextField(help_text="Describe what the recipe is about.", default='N/A')
+    description = models.TextField(max_length=480, help_text="Describe what the recipe is about. Max 480 characters", default='N/A')
 
     def __str__(self):
         return self.name

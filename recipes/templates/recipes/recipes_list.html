@@ -1,0 +1,45 @@
+{% extends "recipes/base.html" %}
+
+{% block content %}
+
+<h1 style="font-family: 'Antipasto';">All recipes</h1>
+
+<div class="row">
+    {% for recipe in object_list %}
+    <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 mb-4 slide-in">
+        <!-- Wrap the card with an <a> tag -->
+        <a href="{% url 'recipes:detail' recipe.id %}" class="text-decoration-none text-dark">
+            <div class="card h-100">
+                {% if recipe.image %}
+                <img src="{{ recipe.image.url }}" class="card-img-top recipe-img" alt="{{ recipe.name }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ recipe.name }}</h5>
+                    <p class="card-text">
+                    <p>
+                        {% if recipe.ingredients.all|length >= 4 %}
+                        {% if recipe.ingredients.all|slice:":4"|join:", "|length > 35 %}
+                    <p>
+                        {{ recipe.ingredients.all|slice:":3"|join:", " }}, more
+                    </p>
+                    {% else %}
+                    <p>
+                        {{ recipe.ingredients.all|slice:":4"|join:", " }}, more
+                    </p>
+                    {% endif %}
+                    {% else %}
+                    <p>
+                        {{ recipe.ingredients.all|join:", " }}
+                    </p>
+                    {% endif %}
+                    </p>
+                    <img src="../../../media/cooking_time.png" height="20px" /> {{ recipe.cooking_time }} minutes <br>
+                    <img src="../../../media/difficulty-bigger.png" height="20px" /> {{ recipe.difficulty }}
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,16 +1,36 @@
 from django.test import TestCase
 
-from .models import Recipe
+from .models import Recipe, Ingredient
 
 
 class RecipeModelTest(TestCase):
     # setting up non-modified objects used by test methods
-    def setUpTestData():
-        Recipe.objects.create(
+    @classmethod
+    def setUpTestData(cls):
+        tea_recipe = Recipe.objects.create(
             name="Tea",
             cooking_time=5,
-            ingredients=["Water", "Sugar", "Tea Leaves"],
             instructions="Test instructions"
+        )
+
+        # Create Ingredient objects and link them to the Recipe object
+        Ingredient.objects.create(
+            recipe=tea_recipe,
+            quantity="1 cup",
+            name="Water",
+            description=""
+        )
+        Ingredient.objects.create(
+            recipe=tea_recipe,
+            quantity="1 tsp.",
+            name="Sugar",
+            description=""
+        )
+        Ingredient.objects.create(
+            recipe=tea_recipe,
+            quantity="1",
+            name="Tea Bag",
+            description=""
         )
 
     def test_name_length(self):
@@ -19,7 +39,7 @@ class RecipeModelTest(TestCase):
         # get metadata of name field and use to query its max_length
         max_length = recipe._meta.get_field("name").max_length
         # compare value to expected result
-        self.assertEqual(max_length, 50)
+        self.assertEqual(max_length, 255)
 
     def test_name_label(self):
         recipe = Recipe.objects.get(id=1)
@@ -38,9 +58,8 @@ class RecipeModelTest(TestCase):
         # compare cooking time value to expected result
         self.assertEqual(recipe.cooking_time, 5)
 
-    def test_ingredients_help_text(self):
+    def test_get_absolute_url(self):
         recipe = Recipe.objects.get(id=1)
-        # get metadata of ingredients field and use to query its help text
-        ing_help_text = recipe._meta.get_field("ingredients").help_text
-        # compare value to expected result
-        self.assertEqual(ing_help_text, "255 characters max, separated by commas; ex: banana, milk")
+        # get_absolute_url() should take you to the detail page of recipe #1
+        # and load the URL /recipes/list/1
+        self.assertEqual(recipe.get_absolute_url(), '/list/1')

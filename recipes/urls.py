@@ -1,10 +1,11 @@
+# recipes/urls.py
 from django.urls import path
-from .views import home, RecipeListView, RecipeDetailView
+from .views import RecipeListView, RecipeDetailView, submit_recipe
 
 app_name = 'recipes'
 
 urlpatterns = [
-    path('', home, name='home'),
     path('list/', RecipeListView.as_view(), name='list'),
-    path('list/<pk>', RecipeDetailView.as_view(), name='detail')
+    path('list/<pk>/', RecipeDetailView.as_view(), name='detail'),
+    path('submit/', submit_recipe, name='submit_recipe'),
 ]

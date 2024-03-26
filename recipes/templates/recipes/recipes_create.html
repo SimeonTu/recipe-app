@@ -1,0 +1,115 @@
+{% extends "recipes/base.html" %}
+
+{% block content %}
+<!-- Recipe Submission Form Heading -->
+<h2>Submit a Recipe</h2>
+
+<!-- Form Start -->
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %} <!-- CSRF Token for form security -->
+    {{ form.as_p }} <!-- Render the main recipe form fields -->
+
+    <!-- Ingredients Section -->
+    <div class="section">
+        <h3>Ingredients</h3>
+        <div id="ingredients-container">
+            {{ ingredientFormSet.management_form }} <!-- Management form required for formset functionality -->
+            {% for form in ingredientFormSet %}
+            <!-- Individual Ingredient Form Row -->
+            <div class="ingredient-form form-row">
+                {{ form.as_p }} <!-- Render the ingredient form fields -->
+                <button type="button" class="remove-form-row">Remove</button> <!-- Button to remove this form row -->
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" id="add-ingredient">Add Ingredient</button>
+        <!-- Button to add a new ingredient form row -->
+    </div>
+
+    <!-- Steps Section -->
+    <div class="section">
+        <h3>Steps</h3>
+        <div id="steps-container">
+            {{ stepFormSet.management_form }} <!-- Management form required for formset functionality -->
+            {% for form in stepFormSet %}
+            <!-- Individual Step Form Row -->
+            <div class="step-form form-row">
+                {{ form.as_p }} <!-- Render the step form fields -->
+                <button type="button" class="remove-form-row">Remove</button> <!-- Button to remove this form row -->
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" id="add-step">Add Step</button> <!-- Button to add a new step form row -->
+    </div>
+
+    <!-- Submit Button for the Entire Form -->
+    <button type="submit">Submit Recipe</button>
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript">
+    // JavaScript to dynamically add and remove form rows for ingredients and steps
+    document.addEventListener('DOMContentLoaded', function () {
+        // Function to add a new form row
+        function addFormRow(containerId, prefix) {
+            const container = document.getElementById(containerId); // The div container of the formset
+            const totalForms = document.getElementById(`id_${prefix}-TOTAL_FORMS`); // The hidden input that keeps track of the total number of forms
+            let formNum = container.getElementsByClassName('form-row').length; // Current number of form rows
+            let newForm = container.querySelector('.form-row').cloneNode(true); // Clone the first form-row as a template
+
+            // Update new form's input IDs and names for uniqueness
+            newForm.querySelectorAll('input, select, textarea').forEach(input => {
+                const nameRegex = new RegExp(`${prefix}-\\d+-`, 'g');
+                input.name = input.name.replace(nameRegex, `${prefix}-${formNum}-`);
+                if (input.id) {
+                    input.id = input.id.replace(nameRegex, `${prefix}-${formNum}-`);
+                }
+                // Reset input values for the new form row
+                if (input.type !== 'checkbox' && input.type !== 'radio') {
+                    input.value = '';
+                } else {
+                    input.checked = false; // Uncheck checkboxes and radios
+                }
+            });
+
+            totalForms.value = formNum + 1; // Increment the total number of forms
+
+            container.appendChild(newForm); // Append the new form row to the container
+
+            // Attach event listener to the new form's remove button
+            newForm.querySelector('.remove-form-row').addEventListener('click', function () {
+                this.parentNode.remove(); // Remove the form row on button click
+                updateTotalForms(prefix, container); // Update the total forms count
+            });
+        }
+
+        // Function to update the total number of forms after removing a form row
+        function updateTotalForms(prefix, container) {
+            const totalForms = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+            let formNum = container.getElementsByClassName('form-row').length; // Recalculate the number of form rows
+            totalForms.value = formNum; // Update the total forms count
+        }
+
+        // Event listeners for adding new form rows
+        document.getElementById('add-ingredient').addEventListener('click', function () {
+            addFormRow('ingredients-container', 'ingredients'); // Add ingredient form row
+        });
+
+        document.getElementById('add-step').addEventListener('click', function () {
+            addFormRow('steps-container', 'steps'); // Add step form row
+        });
+
+        // Attach event listeners to existing remove buttons
+        document.querySelectorAll('.remove-form-row').forEach(button => {
+            button.addEventListener('click', function () {
+                this.parentNode.remove(); // Remove the current form row when the remove button is clicked
+                const containerId = this.closest('.section').id; // Determine whether it's an ingredient or step form row based on the parent container ID
+                const prefix = containerId.includes('ingredients') ? 'ingredients' : 'steps'; // Deduce the formset prefix from the container ID
+                updateTotalForms(prefix, document.getElementById(containerId)); // Update the total number of forms in the formset
+            });
+        });
+    });
+</script>
+{% endblock %}

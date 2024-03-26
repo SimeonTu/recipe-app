@@ -49,7 +49,6 @@
         <ul>
             {% for ingredient in object.ingredients.all %}
             <li style="font-size: 1.1rem;" class="p-1">{{ ingredient.quantity }} {{ ingredient.name }}{% if ingredient.description %}, {{ ingredient.description }}
-                {% else %}
                 {% endif %}
             </li>
             {% endfor %}
@@ -77,5 +76,25 @@
 
 </div>
 
-
 {% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const slideInElements = document.querySelectorAll('.slide-in');
+
+        slideInElements.forEach((element, index) => {
+            // Set the animation delay
+            element.style.animationDelay = `${index * 0.1}s`;
+
+            // Add event listener to trigger animation when element comes into view
+            element.addEventListener("animationstart", function () {
+                this.style.opacity = 1; // Set opacity to 1 when animation starts
+            });
+        });
+    });
+</script>
+
+{% endblock extra_js %}

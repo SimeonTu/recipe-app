@@ -1,10 +1,54 @@
 {% extends "recipes/base.html" %}
 
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+
 {% block content %}
 
 <h1 style="font-family: 'Antipasto';">All recipes</h1>
 
+<form method="get" action="{% url 'recipes:list' %}" class="mb-3">
+    <div class="row col-md-8 mb-3 mx-auto">
+        <div class="d-flex">
+            <div class="input-group" style="height: 45px;">
+                {{ search_form.name }}
+                <button type="submit" height="45" class="btn btn-primary mt-0"><i class="fas fa-search"></i></button>
+            </div>
+            <button type="button" style="width: 170px" class="btn btn-primary mt-0 ms-2" id="show-details-btn">Data
+                analytics</button>
+        </div>
+    </div>
+    <div class="row col-md-10 mx-auto">
+        <div class="col-md-3 mb-3 mb-md-0">
+            {{ search_form.difficulty }}
+        </div>
+        <div class="col-md-3 mb-3 mb-md-0">
+            {{ search_form.cooking_time }}
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+            {{ search_form.ingredients }}
+        </div>
+    </div>
+
+</form>
+
+<div>
+    <div id="details" class="table-responsive" style="display: none;">
+        {% if sales_df %}
+        {{ sales_df|safe }}
+        <br>
+        <img class="chart-img" src="data:image/png;base64, {{chart1|safe}}">
+        <img class="chart-img" src="data:image/png;base64, {{chart_difficulty|safe}}">
+
+        {% else %}
+        <h3 class="opacity-75 text-center mt-2 mb-4">No data, try searching or filtering recipes first.</h3>
+        {% endif %}
+    </div>
+</div>
+
 <div class="row">
+
     {% for recipe in object_list %}
     <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 mb-4 slide-in">
         <!-- Wrap the card with an <a> tag -->
@@ -40,6 +84,110 @@
             </div>
         </a>
     </div>
+    {% empty %}
+    <p>No recipes found.</p>
     {% endfor %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+<script src="https://kit.fontawesome.com/49a44cbe28.js" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="{% static 'django_select2/django_select2.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- limit number of ingredient tags -->
+<script>
+    $(document).ready(function () {
+
+        $("#show-details-btn").click(function () {
+            $("#details").toggle(); // This toggles the visibility
+            $(this).toggleClass('orange');
+        });
+
+        function cookingTimePlaceholder(icon, container) {
+            // Check if the current item is the placeholder
+            if (!icon.id) {
+                // This is the placeholder
+                return $('<span><i class="fas fa-clock"></i> Cooking time</span>');
+            }
+            // For actual selections, include the icon
+            var $icon = $(
+                '<span><i class="fas fa-clock"></i> ' + icon.text + '</span>'
+            );
+            return $icon;
+        }
+
+        function difficultyPlaceholder(icon, container) {
+            // Check if the current item is the placeholder
+            if (!icon.id) {
+                // This is the placeholder
+                return $('<span><i class="fas fa-star"></i> Difficulty</span>');
+            }
+            // For actual selections, include the icon
+            var $icon = $(
+                '<span><i class="fas fa-star"></i> ' + icon.text + '</span>'
+            );
+            return $icon;
+        }
+
+
+        // Re-initialize the #id_cooking_time Select2 with custom template functions
+        $('#id_cooking_time').select2({
+            templateSelection: cookingTimePlaceholder,
+        });
+
+        // Re-initialize the #id_cooking_time Select2 with custom template functions
+        $('#id_difficulty').select2({
+            templateSelection: difficultyPlaceholder,
+        });
+
+        ////// Code for fixing ingredients placeholder
+        // Target the Select2 container generated for the specific widget
+        var $select2Container = $('.select2-multi').next('.select2-container');
+
+        // Add FontAwesome icon to Select2 container for the placeholder
+        var $placeholderIcon = $('<span class="select2-placeholder-icon"><i class="fas fa-pepper-hot"></i> Ingredients</span>');
+
+        // Prepend the icon to the Select2 selection area
+        $select2Container.find('.select2-selection--multiple').prepend($placeholderIcon);
+
+        // Bind event to hide icon when dropdown is opened or a selection is made
+        $('.select2-multi').on('select2:opening select2:select', function (e) {
+            $('.select2-placeholder-icon').hide();
+        });
+
+        // Bind event to show icon only if no selection is made (when closing the dropdown)
+        $('.select2-multi').on('select2:closing', function (e) {
+            // Check if any selection exists
+            var selectedValues = $(this).val();
+            if (!selectedValues || selectedValues.length === 0) {
+                $('.select2-placeholder-icon').show();
+            }
+        });
+
+        // Initially hide the icon if there are pre-selected values on page load
+        if ($('.select2-multi').val().length > 0) {
+            $('.select2-placeholder-icon').hide();
+        }
+        //////
+
+        ////// Code for automatically submitting form once a multi selection box is triggered
+        // Automatically submit the form when any select field or the text input changes
+        $('#id_name, #id_difficulty, #id_cooking_time, .select2-multi').on('change', function () {
+            $(this).closest('form').submit();
+        });
+
+        // Special handling for Select2 Multi-Select to trigger change on the original select element
+        $('.select2-multi').on('select2:select select2:unselect', function () {
+            // This triggers the change event on the original hidden select element
+            // which is then caught by the above event listener to submit the form
+            $(this).trigger('change');
+        });
+        ///////
+    });
+</script>
+
 {% endblock %}

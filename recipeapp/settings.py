@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY','django-insecure-vcwsnc61pnw)b%vw@_ine*&7x=t$_e6_9iilykpjwi!ir96_63')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['cookie-recipe-app-72f47234c214.herokuapp.com', '127.0.0.1']
 

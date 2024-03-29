@@ -1,6 +1,8 @@
-# recipe-app
+# Cookie / recipe-app
 
-A project built using the Python-based Django framework, which is being hosted on Heroku. It allows its users to view a recipe wiki, upload their own recipes, and search for recipes.
+A project built using the Python-based Django framework, which is being hosted on Heroku. It allows its users to view a list of recipes, upload their own recipes after registering, search and filter for recipes, and display different analytics about the filtered recipes.
+
+![Cookie home page](https://i.imgur.com/mniIWwT.png)
 
 ## Installation:
 
@@ -15,8 +17,16 @@ A project built using the Python-based Django framework, which is being hosted o
 5. In your browser, navigate to [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 ## Features:
-- Admin panel capable of preforming CRUD operations on database (can be accessed by going to /admin URL and logging in with same credentials as above)
-- View all recipes in list
-- Click on any recipe to view it's details
-- Create new recipes by entering custom information
-- Search recipes by sorting based upon difficulty, filtered results returned in the form of different charts
+- Modern and responsive UI
+- View list of different recipes
+- Search for and filter for recipes by name, cooking time range, difficulty, and ingredients
+- Ability to register and submit own recipes to the site
+- Click on a recipe to view all details about it including ingredients and cooking instructions
+- View data analytics about filtered recipes in the form of tables and different charts
+
+## Tech Stack
+- Python
+- Django
+- HTML/CSS w/ Bootstrap
+- JavaScript / jQuery
+- Heroku

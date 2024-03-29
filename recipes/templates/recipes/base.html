@@ -36,11 +36,11 @@
 
                 <div style="height: 100%;" class="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div class="navbar-nav">
-                        <a class="nav-link un" aria-current="page" href="{% url 'home' %}">Home</a>
+                        <a class="nav-link" aria-current="page" href="{% url 'home' %}"><span class="un">Home</span></a>
                         {% comment %} {% if request.resolver_match.url_name == 'home' %}active{% endif %} {% endcomment %}
-                        <a class="nav-link un" href="{% url 'recipes:list' %}">Recipes</a>
+                        <a class="nav-link" href="{% url 'recipes:list' %}"><span class="un">Recipes</span></a>
                         {% if user.is_authenticated %}
-                        <a class="nav-link un" href="{% url 'recipes:submit_recipe' %}">Submit recipe</a>
+                        <a class="nav-link" href="{% url 'recipes:submit_recipe' %}"><span class="un">Submit recipe</span></a>
                         {% endif %}
                     </div>
                     <div class="navbar-nav ms-auto">

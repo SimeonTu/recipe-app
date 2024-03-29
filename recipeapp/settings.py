@@ -28,7 +28,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY','django-insecure-vcwsnc61pnw)b%v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['radiant-basin-91055-10bb7ac3964f.herokuapp.com', '127.0.0.1']
+ALLOWED_HOSTS = ['cookie-recipe-app-72f47234c214.herokuapp.com', '127.0.0.1']
 
 
 # Application definition

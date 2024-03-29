@@ -1,0 +1,249 @@
+:root {
+    --font-base: rgb(71,31,10);
+    --background-base: rgb(250,250,221);
+    --bs-primary-rgb: var(--font-base);
+    --bs-border-color: var(--font-base);
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url("../fonts/Roboto-Regular.8a36205bd9b8.ttf") format("truetype");
+  }
+
+  @font-face {
+    font-family: 'Antipasto';
+    src: url("../fonts/Antipasto-Pro-ExtraBold.9ca44f98a7d4.ttf") format("truetype");
+  }
+
+body {
+    font-family: 'Roboto', sans-serif;
+    color: var(--font-base);
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-base)
+}
+
+.navbar {
+    --bs-navbar-active-color: var(--font-base) !important
+}
+
+.nav-link {
+    --bs-nav-link-color: var(--font-base);
+    --bs-nav-link-hover-color: #bc4e18 !important
+}
+
+/* .active {
+    text-shadow: 0 0 2px #bc4e18;
+} */
+
+.navbar-nav {
+    font-family: 'Antipasto';
+    font-size: 1.5rem;
+}
+
+.navbar-nav a {
+    margin-top: 0.7rem;
+    padding-bottom: 0;
+}
+
+.content {
+    padding: 20px;
+}
+.recipe {
+    background-color: white;
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 8px;
+    -webkit-box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.15);
+    -moz-box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.15);
+    box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.15);
+}
+
+@keyframes slideInFromLeft {
+    0% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.slide-in {
+    opacity: 0; /* Set initial opacity to 0 to hide the cards */
+    animation: slideInFromLeft 0.5s ease-out forwards; /* Ensure the final state of the animation is maintained */
+}
+
+.recipe-img {
+    width: 100%; /* Make the image fill the card width */
+    height: 200px; /* Define a fixed height for the images */
+    object-fit: cover; /* Cover the box, zooming in on the image if necessary */
+    object-position: center; /* Center the image within the box */
+}
+
+.card {
+    --bs-card-border-color: rgba(71,31,10,0.0);
+    --bs-card-bg: rgba(255,255,255,0.9);
+
+    border: unset;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.15);
+}
+
+.btn-primary {
+    --bs-btn-bg: var(--font-base);
+    --bs-btn-hover-bg: #bc4e18;
+    --bs-btn-active-bg: #bc4e18;
+
+    border: unset;
+}
+
+/* fixing links */
+  a {
+    color: var(--font-base);
+    transition: text-decoration-co 0.15s;
+  }
+
+  a:link { 
+    text-decoration: none; 
+  } 
+
+  a:visited { 
+    text-decoration: none; 
+  } 
+
+  a:hover { 
+    text-decoration: none; 
+  } 
+
+  a:active { 
+    text-decoration: none; 
+  }
+
+  /* underline slide effect */
+  .un {
+    display: inline-block;
+  }
+  
+  .un::after {
+    content: '';
+    width: 0px;
+    height: 1px;
+    display: block;
+    background: var(--font-base);
+    transition: 300ms;
+  }
+  
+  .un:hover::after {
+    width: 100%;
+  }
+
+  /* login and logout buttons */
+  .login-logout-btn {
+    margin: 1.1rem 0 0 0; 
+    margin-right: auto; 
+    padding: 0.6rem 1.3rem 0.33rem 1.3rem !important; 
+    font-size: 1.2rem;
+  }
+
+  /* toast styles */
+  .toast {
+    --bs-toast-bg: rgba(var(--bs-body-bg-rgb), 1);
+  }
+
+  .toast-header {
+    color: var(--font-base);
+    background-color: #fdc27b;
+    font-family: 'Antipasto';
+    font-size: 1.25rem;
+    font-weight: bold;
+  }
+
+  /* make close btn within toast header smaller */
+  .toast-header .btn-close {
+    width: 0.5em;
+    height: 0.5em;
+  }
+
+  .toast-body {
+    padding: 1.25em;
+    color: var(--font-base)
+  }
+
+  .select2-selection--single .select2-selection__rendered {
+    line-height: 34px !important;
+  }
+
+  .select2-search__field {
+    height: 35px !important;
+  }
+
+  .select2-container .select2-selection--single, .select2-container .select2-selection--multiple {
+      height: 35px !important;
+  }
+
+  .select2-selection__arrow {
+      height: 34px !important;
+  }
+
+  .select2-selection--single .select2-selection__clear {
+    height: 34px !important;
+  }
+
+  .select2-selection__choice {
+    vertical-align: top !important;
+    background-color: #fdc27b !important;
+    border: 1px solid var(--font-base) !important;
+    color: var(--font-base) !important
+  }
+
+  .select2-selection__choice button {
+    border-right: 1px solid var(--font-base) !important;
+    color: var(--font-base) !important;
+  }
+
+  .input-group-text {
+    color: var(--font-base)#fdc27b !important;
+    background-color: #fdc27b !important;
+  }
+
+  .select2-container .select2-placeholder-icon {
+    position: absolute;
+    left: 8px; /* Adjust as necessary */
+    top: 5px; /* Adjust based on the height of your Select2 container */
+    color: rgb(92, 83, 83); /* Placeholder text color */
+    font-size: 16px; /* Adjust as necessary */
+  }
+
+  .select2-selection__placeholder {
+    color: rgb(92, 83, 83) !important; /* Placeholder text color */
+  }
+
+  .select2-container .select2-selection--multiple {
+      position: relative;
+  }
+
+  .row {
+    justify-content: center;
+  }
+
+  .col {
+    flex: unset;
+    width: 70%
+  }
+
+  th {
+    text-align: start;
+  }
+
+  .orange {
+    background-color: #da5a1a !important;
+  }
+
+  .box-shadow {
+    box-shadow: 0px 0px 7.5px 0px rgba(0,0,0,0.15);
+  }
+
+  .delete-checkbox, .delete-checkbox + label {
+    display: none;
+  }

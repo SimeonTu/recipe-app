@@ -47,7 +47,7 @@
                         {% if user.is_authenticated %}
                         <a class="btn btn-primary login-logout-btn" type="button" href="{% url 'logout' %}">Logout</a>
                         {% else %}
-                        <a class="btn btn-primary login-logout-btn me-2" type="button" href="{% url 'register' %}">Register</a>
+                        <a class="btn btn-primary login-logout-btn me-lg-2" type="button" href="{% url 'register' %}">Register</a>
                         <a class="btn btn-primary login-logout-btn" type="button" href="{% url 'login' %}">Login</a>
                         {% endif %}
                     </div>
@@ -67,7 +67,7 @@
                 Find me on
             </span>
 
-            <div class="d-flex">
+            <div style="width: 100%; justify-content: center;" class="d-flex">
                 <a class="d-flex justify-content-end" style="height: 20px;" href="https://github.com/SimeonTu"
                     target="_blank">
                     <img style="margin-right: 2px;" src="../../../media/github.png" alt="Github Link" /><span

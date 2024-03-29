@@ -119,18 +119,41 @@ def pie_chart_recipes_by_cooking_time(df):
 
 
 def line_chart_ingredient_usage(data):
+    # Switch to a backend that doesn't require a GUI
     plt.switch_backend('AGG')
+    
+    # Create a new figure with a specified size
     fig, ax = plt.subplots(figsize=(10, 6))
-    # Sort data for better visualization, if not already sorted
-    data = data.sort_values('total', ascending=True)
-    plt.plot(data['name'], data['total'], marker='o',
-             linestyle='-', color='skyblue')
-    plt.title('Number of Recipes per Ingredient')
-    plt.xlabel('Ingredient')
-    plt.ylabel('Number of Recipes')
-    plt.xticks(rotation=90)  # Rotate ingredient names for better readability
-    plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+    
+    # Check if the dataframe is empty
+    if data.empty:
+        # Data is empty; display a message instead of a graph
+        plt.text(0.5, 0.5, 'No ingredient usage data available', 
+                 horizontalalignment='center', 
+                 verticalalignment='center', 
+                 transform=ax.transAxes)
+        plt.title('Number of Recipes per Ingredient')
+    else:
+        # Data is not empty; proceed with plotting
+        
+        # Sort data for better visualization, if not already sorted
+        data = data.sort_values('total', ascending=True)
+        
+        # Plot the data
+        plt.plot(data['name'], data['total'], marker='o', linestyle='-', color='skyblue')
+        plt.title('Number of Recipes per Ingredient')
+        plt.xlabel('Ingredient')
+        plt.ylabel('Number of Recipes')
+        
+        # Rotate ingredient names for better readability
+        plt.xticks(rotation=90)  
+        
+        # Add grid
+        plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+    
+    # Adjust layout for better fit
     plt.tight_layout()
-
+    
+    # Generate the graph using your utility function
     chart = get_graph()
     return chart

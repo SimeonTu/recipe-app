@@ -6,12 +6,12 @@
     <div class="row">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="col mx-auto">
+            <div class="col-12 col-md-10 col-lg-8 mx-md-auto">
                 <h2 class="mb-3">Submit a Recipe</h2>
                 {{ form|crispy }}
             </div>
 
-            <div class="col mx-auto">
+            <div class="col-12 col-md-10 col-lg-8 mx-md-auto">
                 <h3>Ingredients</h3>
                 <div id="ingredients-container">
                     {{ ingredientFormSet.management_form }}
@@ -38,8 +38,8 @@
                 </div>
             </div>
 
-            <div class="col form-group mx-auto">
-                <button type="submit" class="d-block btn btn-primary ms-auto">Submit Recipe</button>
+            <div class="col-12 col-md-3 col-lg-2 mx-md-auto form-group">
+                <button type="submit" class="d-block btn btn-primary w-100">Submit Recipe</button>
             </div>
         </form>
     </div>

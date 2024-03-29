@@ -10,12 +10,12 @@
 
 <form method="get" action="{% url 'recipes:list' %}" class="mb-3">
     <div class="row col-md-9 col-lg-7 mb-3 mx-auto">
-        <div class="d-flex">
-            <div class="input-group" style="height: 45px;">
+        <div class="d-flex search-form">
+            <div class="input-group">
                 {{ search_form.name }}
                 <button type="submit" height="45" class="btn btn-primary mt-0"><i class="fas fa-search"></i></button>
             </div>
-            <button type="button" style="width: 170px" class="btn btn-primary mt-0 ms-2" id="show-details-btn">Data
+            <button type="button" style="width: 170px" class="btn btn-primary mt-2 mt-sm-0 ms-sm-2" id="show-details-btn">Data
                 analytics</button>
         </div>
     </div>

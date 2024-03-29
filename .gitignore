@@ -3,6 +3,3 @@
 
 # Database
 *.sqlite3
-
-# ignore settings.py
-recipeapp/settings.py

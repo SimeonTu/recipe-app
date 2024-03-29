@@ -47,7 +47,7 @@ class RegisterForm(UserCreationForm):
 class RecipeForm(ModelForm):
     class Meta:
         model = Recipe
-        fields = ['name', 'cooking_time', 'image']
+        fields = ['name', 'cooking_time', 'image', 'description']
 
     def __init__(self, *args, **kwargs):
         super(RecipeForm, self).__init__(*args, **kwargs)

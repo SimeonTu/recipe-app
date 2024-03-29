@@ -28,7 +28,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY','django-insecure-vcwsnc61pnw)b%v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['radiant-basin-91055-10bb7ac3964f.herokuapp.com']
+ALLOWED_HOSTS = ['radiant-basin-91055-10bb7ac3964f.herokuapp.com', '127.0.0.1']
 
 
 # Application definition
@@ -145,6 +145,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # AUTH
 LOGIN_URL = '/login/'
 
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///' + str(BASE_DIR / 'db.sqlite3'))
+
 DATABASES = {
-    'default': dj_database_url.config(default='sqlite:///db.sqlite3', conn_max_age=600, ssl_require=True)
+    'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require='postgres' in DATABASE_URL)
 }

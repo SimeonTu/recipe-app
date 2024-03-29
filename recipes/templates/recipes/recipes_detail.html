@@ -1,5 +1,9 @@
 {% extends "recipes/base.html" %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+{% endblock %}
+
 {% block content %}
 
 <a href="{% url 'recipes:list' %}" type="button" class="btn btn-primary mb-2"><img src="../../../media/back.svg"
@@ -28,12 +32,32 @@
             <hr style="margin: 0.5rem 0;" class="bg-primary border-1 border-top border-primary" />
 
             <div>
-                <div style="height: 30px;" class="d-flex align-items-end">
-                    <img src="../../../media/cooking_time.png" height="26px" /> <span >
-                        {{ recipe.cooking_time }} minutes</span>
+                <div class="d-flex align-items-center">
+                    <div style="width: 16px;" class="d-flex justify-content-center">
+                        <i class="fas fa-clock" aria-hidden="true"></i>
+                    </div>
+                    <span class="ms-1">{{ recipe.cooking_time }} minutes</span>
                 </div>
-                <div style="height: 30px;" class="d-flex align-items-center">
-                    <img style="margin: 0 4px 0 2px;" src="../../../media/difficulty-bigger.png" width="22px" /> <span>{{ recipe.difficulty }}</span>
+                <div class="d-flex align-items-center">
+                    <div style="width: 16px;" class="d-flex justify-content-center">
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                    </div>
+                    <span class="ms-1">{{ recipe.difficulty }}</span>
+                </div>
+                <!-- "Submitted by" -->
+                <div class="d-flex align-items-center">
+                    <div style="width: 16px;" class="d-flex justify-content-center">
+                        <i class="fas fa-user" aria-hidden="true"></i> <!-- FontAwesome User Icon -->
+                    </div>
+                    <span class="ms-1">{{ object.submitted_by.username }}</span>
+                </div>
+
+                <!-- "Submitted on" -->
+                <div class="d-flex align-items-center">
+                    <div style="width: 16px;" class="d-flex justify-content-center">
+                        <i class="fas fa-calendar" aria-hidden="true"></i> <!-- FontAwesome Calendar Icon -->
+                    </div>
+                    <span class="ms-1">{{ object.submitted_on|date:"F d, Y" }}</span>
                 </div>
             </div>
         </div>

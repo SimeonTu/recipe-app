@@ -11,6 +11,7 @@
     <h1 style="font-family: 'Antipasto';">Featured recipes</h1>
 
     <div class="row">
+        {% if recipes %}
         {% for recipe in recipes %}
         <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 mb-4 slide-in">
             <!-- Wrap the card with an <a> tag -->
@@ -47,6 +48,9 @@
             </a>
         </div>
         {% endfor %}
+        {% else %}
+        <div>No recipes found.</div>
+        {% endif %}
     </div>
 
 </div>

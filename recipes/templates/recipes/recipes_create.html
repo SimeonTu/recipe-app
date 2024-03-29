@@ -59,48 +59,71 @@
 {% block extra_js %}
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-    $(document).ready(function () {
-        // Function to add a new form row
-        function addFormRow(containerSelector, prefix) {
-            const container = $(containerSelector);
-            const totalForms = $('#id_' + prefix + '-TOTAL_FORMS');
-            let formNum = parseInt(totalForms.val());
-            const newForm = container.find('.form-row:first').clone(true).removeClass('d-none');
+$(document).ready(function() {
+    var ingredientFormIndex = $('#id_ingredients-TOTAL_FORMS').val();
+    var stepFormIndex = $('#id_steps-TOTAL_FORMS').val();
 
-            // Clear the values in the cloned form and update its index
-            newForm.find(':input').each(function () {
-                let name = $(this).attr('name');
-                if (name) {
-                    name = name.replace('-0-', '-' + formNum + '-');
-                    const id = 'id_' + name;
-                    $(this).attr({ 'name': name, 'id': id }).val('').removeAttr('checked');
-                }
+    // Function to update headings
+    function updateHeadings(container) {
+        $('#' + container + '-container .form-row').each(function(index) {
+            $(this).find('strong').remove(); // Remove the existing heading to prevent duplication
+            var formLabel = $('<strong>').text(container.slice(0, -1).charAt(0).toUpperCase() + container.slice(1, -1) + ' ' + (index + 1));
+            $(this).prepend(formLabel);
+        });
+    }
+
+    // Update headings for initial forms
+    updateHeadings('ingredients');
+    updateHeadings('steps');
+
+    // Function to add form dynamically
+    function addForm(btn, container, formIndex) {
+        var newForm = $('#empty-' + container + '-form').clone(true);
+        newForm.html(newForm.html().replace(/__prefix__/g, formIndex));
+        newForm.attr('id', '').attr('style', '');
+        newForm.insertBefore($(btn));
+        var formLabel = $('<strong>').text(container.slice(0, -1).charAt(0).toUpperCase() + container.slice(1) + ' ' + (Number(formIndex)+1));
+        newForm.prepend(formLabel);
+        return newForm;
+    }
+
+    // Add ingredient
+    $('#add-ingredient').click(function() {
+        var newForm = addForm(this, 'ingredient', ingredientFormIndex);
+        ingredientFormIndex++;
+        $('#id_ingredients-TOTAL_FORMS').val(ingredientFormIndex);
+
+        // Only add the remove button for newly added forms
+        if (ingredientFormIndex > 1) {
+            var removeButton = $('<button type="button" class="btn btn-danger mb-3">Remove</button>'); // Added mb-3 for margin-bottom
+            removeButton.click(function() {
+                $(this).parent().remove();
+                ingredientFormIndex--;
+                $('#id_ingredients-TOTAL_FORMS').val(ingredientFormIndex);
+                updateHeadings('ingredients'); // Update headings to reflect the new order
             });
-
-            // Increment the TOTAL_FORMS count
-            totalForms.val(formNum + 1);
-
-            // Append the remove button to the new form and append the new form to the container
-            newForm.append('<button type="button" class="remove-form-row btn btn-danger mb-3">Remove</button>');
-            container.append(newForm);
-
-            // Bind the remove function to the new remove button
-            newForm.find('.remove-form-row').click(function () {
-                $(this).closest('.form-row').remove();
-                // Decrement the TOTAL_FORMS count after removing
-                totalForms.val(parseInt(totalForms.val()) - 1);
-            });
+            newForm.append(removeButton);
         }
-
-        // Attach the addFormRow function to 'Add ingredient' and 'Add step' buttons
-        $('#add-ingredient').click(function () {
-            addFormRow('#ingredients-container', 'ingredient');
-        });
-        $('#add-step').click(function () {
-            addFormRow('#steps-container', 'step');
-        });
-
-        // Initial form rows won't have a remove button, so no need to hide them manually
     });
+
+    // Add step
+    $('#add-step').click(function() {
+        var newForm = addForm(this, 'step', stepFormIndex);
+        stepFormIndex++;
+        $('#id_steps-TOTAL_FORMS').val(stepFormIndex);
+
+        // Only add the remove button for newly added forms
+        if (stepFormIndex > 1) {
+            var removeButton = $('<button type="button" class="btn btn-danger mb-3">Remove</button>'); // Added mb-3 for margin-bottom
+            removeButton.click(function() {
+                $(this).parent().remove();
+                stepFormIndex--;
+                $('#id_steps-TOTAL_FORMS').val(stepFormIndex);
+                updateHeadings('steps'); // Update headings to reflect the new order
+            });
+            newForm.append(removeButton);
+        }
+    });
+});
 </script>
 {% endblock %}

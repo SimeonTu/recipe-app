@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Count
 from django.contrib import messages
-from .models import Recipe, Ingredient
+from .models import Recipe, Ingredient, Step
 from .forms import IngredientFormSet, StepFormSet, RecipeForm, RecipeSearchForm
 import pandas as pd
 from .utils import bar_chart_recipe_number_by_difficulty, pie_chart_recipes_by_cooking_time, line_chart_ingredient_usage, categorize_cooking_times
@@ -15,15 +15,11 @@ from .utils import bar_chart_recipe_number_by_difficulty, pie_chart_recipes_by_c
 
 
 def home(request):
-    # Define a list of the specific recipe names you want
-    featured_recipes = ["Tea", "Scrambled Eggs",
-                        "Banana Pancakes", "Tomato Basil Pasta"]
-
-    # Filter recipes whose name is in the specific_names list
-    specific_recipes = Recipe.objects.filter(name__in=featured_recipes)
+    # Get the 4 most recent recipes based on their 'submitted_on' timestamp
+    recent_recipes = Recipe.objects.order_by('-submitted_on')[:4]
 
     # Pass the filtered recipes to the template
-    return render(request, 'recipes/recipes_home.html', {'recipes': specific_recipes})
+    return render(request, 'recipes/recipes_home.html', {'recipes': recent_recipes})
 
 # All recipes list page
 
@@ -136,26 +132,26 @@ def submit_recipe(request):
         form = RecipeForm(request.POST, request.FILES)
         if form.is_valid():
             recipe = form.save(commit=False)
+            recipe.submitted_by = request.user  # Set the current user as the submitter
 
-            ingredientFormSet = IngredientFormSet(
-                request.POST, instance=recipe)
+            ingredientFormSet = IngredientFormSet(request.POST, instance=recipe)
             stepFormSet = StepFormSet(request.POST, instance=recipe)
+            
             if ingredientFormSet.is_valid() and stepFormSet.is_valid():
-                # Use a database transaction to ensure that saving the recipe and its related
-                # ingredients and steps either all succeed together or all fail together. This
-                # prevents partial saves and maintains data integrity by rolling back all changes
-                # if any part of the operation fails.
                 with transaction.atomic():
-                    recipe.save()  # First, save the Recipe object
+                    recipe.save()  # First, save the Recipe object. This now includes the submitted_by attribute.
                     ingredientFormSet.save()  # Then save the related objects
                     stepFormSet.save()
 
-                messages.success(
-                    request, 'You have successfully submitted a recipe.')
-
-                return redirect('recipes:list')
+                messages.success(request, 'You have successfully submitted a recipe.')
+                return redirect('recipes:list')  # Adjust the redirect URL as needed
     else:
         form = RecipeForm()
-        ingredientFormSet = IngredientFormSet()
-        stepFormSet = StepFormSet()
-    return render(request, 'recipes/recipes_create.html', {'form': form, 'ingredientFormSet': ingredientFormSet, 'stepFormSet': stepFormSet})
+        ingredientFormSet = IngredientFormSet(queryset=Ingredient.objects.none())  # Initialize an empty formset for ingredients
+        stepFormSet = StepFormSet(queryset=Step.objects.none())  # Initialize an empty formset for steps
+
+    return render(request, 'recipes/recipes_create.html', {
+        'form': form, 
+        'ingredientFormSet': ingredientFormSet, 
+        'stepFormSet': stepFormSet
+    })

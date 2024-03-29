@@ -1,19 +1,19 @@
-{% extends "recipes/base.html" %}
+{% extends 'recipes/base.html' %}
+{% load crispy_forms_tags %}
 
 {% block content %}
-<h1>Login</h1>         
-
-{% if error_message %}
-   {{error_message}}
-{% endif %}
-
-<form action="" method="POST" >
-   {% comment %} add Django security token {% endcomment %}
-   {% csrf_token %}   
-
-   {% comment %} print form received from view  {% endcomment %}
-   {{form}}           
-
-   <button type="submit" >Login</button>
-</form>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <h2 class="mb-1 text-center">Login</h2>
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                {{ form|crispy }}
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

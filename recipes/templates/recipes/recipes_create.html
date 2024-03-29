@@ -1,115 +1,106 @@
 {% extends "recipes/base.html" %}
+{% load crispy_forms_tags %}
 
 {% block content %}
-<!-- Recipe Submission Form Heading -->
-<h2>Submit a Recipe</h2>
-
-<!-- Form Start -->
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %} <!-- CSRF Token for form security -->
-    {{ form.as_p }} <!-- Render the main recipe form fields -->
-
-    <!-- Ingredients Section -->
-    <div class="section">
-        <h3>Ingredients</h3>
-        <div id="ingredients-container">
-            {{ ingredientFormSet.management_form }} <!-- Management form required for formset functionality -->
-            {% for form in ingredientFormSet %}
-            <!-- Individual Ingredient Form Row -->
-            <div class="ingredient-form form-row">
-                {{ form.as_p }} <!-- Render the ingredient form fields -->
-                <button type="button" class="remove-form-row">Remove</button> <!-- Button to remove this form row -->
+<div class="container mt-3">
+    <div class="row">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="col mx-auto">
+                <h2 class="mb-3">Submit a Recipe</h2>
+                {{ form|crispy }}
             </div>
-            {% endfor %}
-        </div>
-        <button type="button" id="add-ingredient">Add Ingredient</button>
-        <!-- Button to add a new ingredient form row -->
-    </div>
 
-    <!-- Steps Section -->
-    <div class="section">
-        <h3>Steps</h3>
-        <div id="steps-container">
-            {{ stepFormSet.management_form }} <!-- Management form required for formset functionality -->
-            {% for form in stepFormSet %}
-            <!-- Individual Step Form Row -->
-            <div class="step-form form-row">
-                {{ form.as_p }} <!-- Render the step form fields -->
-                <button type="button" class="remove-form-row">Remove</button> <!-- Button to remove this form row -->
+            <div class="col mx-auto">
+                <h3>Ingredients</h3>
+                <div id="ingredients-container">
+                    {{ ingredientFormSet.management_form }}
+                    {% for form in ingredientFormSet.forms %}
+                    <div class="ingredient-form form-row">
+                        {{ form|crispy }}
+                        <div class="delete-checkbox">
+                            {{ form.DELETE }} <!-- Or whatever your template code is for the checkbox -->
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <button type="button" id="add-ingredient" class="btn btn-success mb-3">Add Ingredient</button>
+                </div>
+
+                <h3>Steps</h3>
+                <div id="steps-container">
+                    {{ stepFormSet.management_form }}
+                    {% for form in stepFormSet.forms %}
+                    <div class="step-form form-row">
+                        {{ form|crispy }}
+                    </div>
+                    {% endfor %}
+                    <button type="button" id="add-step" class="btn btn-success mb-3">Add Step</button>
+                </div>
             </div>
-            {% endfor %}
-        </div>
-        <button type="button" id="add-step">Add Step</button> <!-- Button to add a new step form row -->
-    </div>
 
-    <!-- Submit Button for the Entire Form -->
-    <button type="submit">Submit Recipe</button>
-</form>
+            <div class="col form-group mx-auto">
+                <button type="submit" class="d-block btn btn-primary ms-auto">Submit Recipe</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Hidden templates for cloning, outside the main form UI -->
+<div id="empty-ingredient-form" style="display:none;">
+    {{ ingredientFormSet.empty_form|crispy }}
+</div>
+
+<div id="empty-step-form" style="display:none;">
+    {{ stepFormSet.empty_form|crispy }}
+</div>
 
 {% endblock %}
 
 {% block extra_js %}
-<script type="text/javascript">
-    // JavaScript to dynamically add and remove form rows for ingredients and steps
-    document.addEventListener('DOMContentLoaded', function () {
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ready(function () {
         // Function to add a new form row
-        function addFormRow(containerId, prefix) {
-            const container = document.getElementById(containerId); // The div container of the formset
-            const totalForms = document.getElementById(`id_${prefix}-TOTAL_FORMS`); // The hidden input that keeps track of the total number of forms
-            let formNum = container.getElementsByClassName('form-row').length; // Current number of form rows
-            let newForm = container.querySelector('.form-row').cloneNode(true); // Clone the first form-row as a template
+        function addFormRow(containerSelector, prefix) {
+            const container = $(containerSelector);
+            const totalForms = $('#id_' + prefix + '-TOTAL_FORMS');
+            let formNum = parseInt(totalForms.val());
+            const newForm = container.find('.form-row:first').clone(true).removeClass('d-none');
 
-            // Update new form's input IDs and names for uniqueness
-            newForm.querySelectorAll('input, select, textarea').forEach(input => {
-                const nameRegex = new RegExp(`${prefix}-\\d+-`, 'g');
-                input.name = input.name.replace(nameRegex, `${prefix}-${formNum}-`);
-                if (input.id) {
-                    input.id = input.id.replace(nameRegex, `${prefix}-${formNum}-`);
-                }
-                // Reset input values for the new form row
-                if (input.type !== 'checkbox' && input.type !== 'radio') {
-                    input.value = '';
-                } else {
-                    input.checked = false; // Uncheck checkboxes and radios
+            // Clear the values in the cloned form and update its index
+            newForm.find(':input').each(function () {
+                let name = $(this).attr('name');
+                if (name) {
+                    name = name.replace('-0-', '-' + formNum + '-');
+                    const id = 'id_' + name;
+                    $(this).attr({ 'name': name, 'id': id }).val('').removeAttr('checked');
                 }
             });
 
-            totalForms.value = formNum + 1; // Increment the total number of forms
+            // Increment the TOTAL_FORMS count
+            totalForms.val(formNum + 1);
 
-            container.appendChild(newForm); // Append the new form row to the container
+            // Append the remove button to the new form and append the new form to the container
+            newForm.append('<button type="button" class="remove-form-row btn btn-danger mb-3">Remove</button>');
+            container.append(newForm);
 
-            // Attach event listener to the new form's remove button
-            newForm.querySelector('.remove-form-row').addEventListener('click', function () {
-                this.parentNode.remove(); // Remove the form row on button click
-                updateTotalForms(prefix, container); // Update the total forms count
+            // Bind the remove function to the new remove button
+            newForm.find('.remove-form-row').click(function () {
+                $(this).closest('.form-row').remove();
+                // Decrement the TOTAL_FORMS count after removing
+                totalForms.val(parseInt(totalForms.val()) - 1);
             });
         }
 
-        // Function to update the total number of forms after removing a form row
-        function updateTotalForms(prefix, container) {
-            const totalForms = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
-            let formNum = container.getElementsByClassName('form-row').length; // Recalculate the number of form rows
-            totalForms.value = formNum; // Update the total forms count
-        }
-
-        // Event listeners for adding new form rows
-        document.getElementById('add-ingredient').addEventListener('click', function () {
-            addFormRow('ingredients-container', 'ingredients'); // Add ingredient form row
+        // Attach the addFormRow function to 'Add ingredient' and 'Add step' buttons
+        $('#add-ingredient').click(function () {
+            addFormRow('#ingredients-container', 'ingredient');
+        });
+        $('#add-step').click(function () {
+            addFormRow('#steps-container', 'step');
         });
 
-        document.getElementById('add-step').addEventListener('click', function () {
-            addFormRow('steps-container', 'steps'); // Add step form row
-        });
-
-        // Attach event listeners to existing remove buttons
-        document.querySelectorAll('.remove-form-row').forEach(button => {
-            button.addEventListener('click', function () {
-                this.parentNode.remove(); // Remove the current form row when the remove button is clicked
-                const containerId = this.closest('.section').id; // Determine whether it's an ingredient or step form row based on the parent container ID
-                const prefix = containerId.includes('ingredients') ? 'ingredients' : 'steps'; // Deduce the formset prefix from the container ID
-                updateTotalForms(prefix, document.getElementById(containerId)); // Update the total number of forms in the formset
-            });
-        });
+        // Initial form rows won't have a remove button, so no need to hide them manually
     });
 </script>
 {% endblock %}

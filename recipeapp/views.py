@@ -4,18 +4,30 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 # Django Form for authentication
 from django.contrib.auth.forms import AuthenticationForm
-from recipes.forms import RegisterForm
+from recipes.forms import RegisterForm, LoginForm
+from django.contrib.auth.views import LoginView
+from django.urls import reverse_lazy
+from django.views.generic.edit import FormView
 
+# define register view
 def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)  # Log in the newly registered user
+            new_user = form.save()  # Save the form and get the new user instance
 
-            messages.success(request, 'You have successfully registered and have been logged in.')
+            # Authenticate the user programmatically
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)  # Authenticate the user
+            
+            if user is not None:
+                login(request, user)  # Log the user in
 
-            return redirect('home')  # Redirect to a post-registration page
+                # Use Django messaging framework to provide a message indicating a successful registration and login
+                messages.success(request, 'You have successfully registered and were logged in.')
+
+                return redirect('home')  # Redirect to a home page or dashboard instead of login page
     else:
         form = RegisterForm()
     return render(request, 'auth/register.html', {'form': form})
@@ -60,6 +72,7 @@ def login_view(request):
     }
     # load the login page using "context" information
     return render(request, 'auth/login.html', context)
+
 
 # define a function view called logout_view that takes a request from user
 

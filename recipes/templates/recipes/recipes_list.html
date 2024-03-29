@@ -9,7 +9,7 @@
 <h1 style="font-family: 'Antipasto';">All recipes</h1>
 
 <form method="get" action="{% url 'recipes:list' %}" class="mb-3">
-    <div class="row col-md-8 mb-3 mx-auto">
+    <div class="row col-md-9 col-lg-7 mb-3 mx-auto">
         <div class="d-flex">
             <div class="input-group" style="height: 45px;">
                 {{ search_form.name }}
@@ -19,7 +19,7 @@
                 analytics</button>
         </div>
     </div>
-    <div class="row col-md-10 mx-auto">
+    <div class="row col-md-12 col-lg-10 mx-auto">
         <div class="col-md-3 mb-3 mb-md-0">
             {{ search_form.difficulty }}
         </div>
@@ -35,11 +35,33 @@
 
 <div>
     <div id="details" class="table-responsive" style="display: none;">
-        {% if sales_df %}
-        {{ sales_df|safe }}
+        {% if df_search_results %}
+        {{ df_search_results|safe }}
         <br>
-        <img class="chart-img" src="data:image/png;base64, {{chart1|safe}}">
-        <img class="chart-img" src="data:image/png;base64, {{chart_difficulty|safe}}">
+
+        <div class="row w-100">
+            <div class="col-12 col-lg-6">
+                {% if chart_recipe_number_by_difficulty %}
+                <img class="w-100 mb-4 box-shadow" src="data:image/png;base64,{{ chart_recipe_number_by_difficulty|safe }}"
+                    alt="Chart of Recipe Numbers by Difficulty">
+                {% endif %}
+            </div>
+
+            <div class="col-12 col-lg-6">
+                {% if chart_ingredient_usage %}
+                <img class="w-100 mb-4 box-shadow" src="data:image/png;base64,{{ chart_ingredient_usage|safe }}"
+                    alt="Chart Ingredient Usage">
+                {% endif %}
+            </div>
+
+            <div class="col-12 col-lg-6">
+                {% if chart_cooking_times_ranges %}
+                <img class="w-100 mb-4 box-shadow" src="data:image/png;base64,{{ chart_cooking_times_ranges|safe }}"
+                    alt="Chart of Cooking Times Ranges">
+                {% endif %}
+            </div>
+
+        </div>
 
         {% else %}
         <h3 class="opacity-75 text-center mt-2 mb-4">No data, try searching or filtering recipes first.</h3>

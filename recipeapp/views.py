@@ -4,10 +4,23 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 # Django Form for authentication
 from django.contrib.auth.forms import AuthenticationForm
+from recipes.forms import RegisterForm
+
+def register_view(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # Log in the newly registered user
+
+            messages.success(request, 'You have successfully registered and have been logged in.')
+
+            return redirect('home')  # Redirect to a post-registration page
+    else:
+        form = RegisterForm()
+    return render(request, 'auth/register.html', {'form': form})
 
 # define a function view called login_view that takes a request from user
-
-
 def login_view(request):
     # initialize:
     # error_message to None

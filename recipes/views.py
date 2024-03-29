@@ -2,15 +2,18 @@ from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import Avg
-from .models import Recipe
+from django.db.models import Count
+from django.contrib import messages
+from .models import Recipe, Ingredient
 from .forms import IngredientFormSet, StepFormSet, RecipeForm, RecipeSearchForm
 import pandas as pd
-from .utils import get_chart1, get_chart2
+from .utils import bar_chart_recipe_number_by_difficulty, pie_chart_recipes_by_cooking_time, line_chart_ingredient_usage, categorize_cooking_times
 
 # Create your views here.
 
 # Home page
+
+
 def home(request):
     # Define a list of the specific recipe names you want
     featured_recipes = ["Tea", "Scrambled Eggs",
@@ -28,9 +31,11 @@ def home(request):
 class RecipeListView(ListView):
     model = Recipe
     template_name = 'recipes/recipes_list.html'
-    dataframes = None   #initialize dataframe to None
-    chart1 = None
-    chart_difficulty = None
+
+    df_search_results = None
+    chart_recipe_number_by_difficulty = None
+    chart_cooking_times_ranges = None
+    chart_ingredient_usage = None
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -62,28 +67,48 @@ class RecipeListView(ListView):
             if ingredients:
                 queryset = queryset.filter(
                     ingredients__in=ingredients).distinct()
-            
-            # average cooking time by difficulty level
-            queryset_difficulty = Recipe.objects.values('difficulty').annotate(average_cooking_time=Avg('cooking_time')).order_by('difficulty')
 
-            dataframes_difficulty = pd.DataFrame(queryset_difficulty)
+            # convert search result recipes queryset into dataframes
+            # convert queryset to panda dataframes
+            self.df_search_results = pd.DataFrame(queryset.values())
 
-            # order of these are important!
-            self.dataframes = pd.DataFrame(queryset.values()) # convert queryset to panda dataframes
+            # Distribution of recipes by cooking time range
+            qs_cooking_time_ranges = queryset.values_list(
+                'cooking_time', flat=True)
+            categorized_cooking_times = categorize_cooking_times(
+                qs_cooking_time_ranges)
+            df_cooking_time_ranges = pd.DataFrame(list(categorized_cooking_times.items()), columns=[
+                                                  'Cooking Time Range', 'Number of Recipes'])
 
-            self.chart1 = get_chart1(self.dataframes) # call get_chart by passing panda dataframes
-            self.chart_difficulty = get_chart2(dataframes_difficulty)
+            # Number of recipes that use each existing ingredient
+            # Filter ingredients by the filtered recipes queryset
+            filtered_ingredients = Ingredient.objects.filter(
+                recipe__in=queryset)
+            qs_ingredient_usage = filtered_ingredients.values(
+                'name').annotate(total=Count('name')).order_by('-total')
+            df_ingredient_usage = pd.DataFrame(qs_ingredient_usage)
 
-            self.dataframes = self.dataframes.to_html(classes=["table", "table-striped", "table-hover"], index=False) # convert dataframes to HTML
+            # get chart image from each chart function by passing it the dataframes
+            self.chart_recipe_number_by_difficulty = bar_chart_recipe_number_by_difficulty(
+                self.df_search_results)
+            self.chart_cooking_times_ranges = pie_chart_recipes_by_cooking_time(
+                df_cooking_time_ranges)
+            self.chart_ingredient_usage = line_chart_ingredient_usage(
+                df_ingredient_usage)
+
+            # search results dataframes converted into an HTML table
+            self.df_search_results = self.df_search_results.to_html(
+                classes=["table", "table-striped", "table-hover"], index=False)  # convert dataframes to HTML
 
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_form'] = self.form  # Add the form to the context
-        context['sales_df'] = self.dataframes
-        context['chart1'] = self.chart1
-        context['chart_difficulty'] = self.chart_difficulty
+        context['df_search_results'] = self.df_search_results
+        context['chart_recipe_number_by_difficulty'] = self.chart_recipe_number_by_difficulty
+        context['chart_cooking_times_ranges'] = self.chart_cooking_times_ranges
+        context['chart_ingredient_usage'] = self.chart_ingredient_usage
 
         return context
 
@@ -111,8 +136,7 @@ def submit_recipe(request):
         form = RecipeForm(request.POST, request.FILES)
         if form.is_valid():
             recipe = form.save(commit=False)
-            # If your Recipe model has an author or similar field:
-            # recipe.author = request.user
+
             ingredientFormSet = IngredientFormSet(
                 request.POST, instance=recipe)
             stepFormSet = StepFormSet(request.POST, instance=recipe)
@@ -125,7 +149,11 @@ def submit_recipe(request):
                     recipe.save()  # First, save the Recipe object
                     ingredientFormSet.save()  # Then save the related objects
                     stepFormSet.save()
-                return redirect('home')
+
+                messages.success(
+                    request, 'You have successfully submitted a recipe.')
+
+                return redirect('recipes:list')
     else:
         form = RecipeForm()
         ingredientFormSet = IngredientFormSet()

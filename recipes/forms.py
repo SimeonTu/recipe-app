@@ -2,7 +2,22 @@ from django.forms import inlineformset_factory, ModelForm
 from django import forms
 from .models import Recipe, Ingredient, Step
 from django_select2.forms import Select2MultipleWidget, Select2Widget
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 
+class RegisterForm(UserCreationForm):
+    email = forms.EmailField(required=True)  # Add email field
+
+    class Meta:
+        model = User
+        fields = ("username", "email", "password1", "password2")
+
+    def save(self, commit=True):
+        user = super(RegisterForm, self).save(commit=False)
+        user.email = self.cleaned_data["email"]
+        if commit:
+            user.save()
+        return user
 
 class RecipeForm(ModelForm):
     class Meta:
@@ -29,8 +44,6 @@ IngredientFormSet = inlineformset_factory(
 StepFormSet = inlineformset_factory(
     Recipe, Step, form=StepForm, extra=1, can_delete=True)
 
-def iformat():
-    return '${<i class="fa fa-camera-retro fa-lg"></i>}'
 
 class RecipeSearchForm(forms.Form):
     name = forms.CharField(required=False, widget=forms.TextInput(

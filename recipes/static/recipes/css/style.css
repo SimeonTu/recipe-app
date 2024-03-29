@@ -146,7 +146,11 @@ body {
     font-size: 1.2rem;
   }
 
-  /* login/logout header */
+  /* toast styles */
+  .toast {
+    --bs-toast-bg: rgba(var(--bs-body-bg-rgb), 1);
+  }
+
   .toast-header {
     color: var(--font-base);
     background-color: #fdc27b;
@@ -236,6 +240,6 @@ body {
     background-color: #da5a1a !important;
   }
 
-  .chart-img {
-    width: 100%;
+  .box-shadow {
+    box-shadow: 0px 0px 7.5px 0px rgba(0,0,0,0.15);
   }

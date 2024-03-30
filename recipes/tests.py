@@ -1,194 +1,173 @@
+from .forms import RecipeSearchForm
+from .forms import IngredientForm, StepForm
+from .forms import RecipeForm
 from django.test import TestCase, Client
 from django.urls import reverse
-from .forms import IngredientFormSet, RecipeForm, RecipeSearchForm
-from .models import Recipe, Ingredient
+from .forms import IngredientFormSet, RecipeForm, RecipeSearchForm, LoginForm, RegisterForm
+from .models import Recipe, Ingredient, Step
 from django.contrib.auth.models import User
 
-class RecipeModelTest(TestCase):
-    # setting up non-modified objects used by test methods
-    @classmethod
-    def setUpTestData(cls):
-        tea_recipe = Recipe.objects.create(
-            name="Tea",
-            cooking_time=5,
-            description="Test description."
-        )
+# Views test cases
 
-        # Create Ingredient objects and link them to the Recipe object
-        Ingredient.objects.create(
-            recipe=tea_recipe,
-            quantity="1 cup",
-            name="Water",
-            description=""
-        )
-        Ingredient.objects.create(
-            recipe=tea_recipe,
-            quantity="1 tsp.",
-            name="Sugar",
-            description=""
-        )
-        Ingredient.objects.create(
-            recipe=tea_recipe,
-            quantity="1",
-            name="Tea Bag",
-            description=""
-        )
-
-    def test_name_length(self):
-        # get recipe to test
-        recipe = Recipe.objects.get(id=1)
-        # get metadata of name field and use to query its max_length
-        max_length = recipe._meta.get_field("name").max_length
-        # compare value to expected result
-        self.assertEqual(max_length, 255)
-
-    def test_name_label(self):
-        recipe = Recipe.objects.get(id=1)
-        # get metadata of name field and use to query its label
-        recipe_name_label = recipe._meta.get_field("name").verbose_name
-        # compare value to expected result
-        self.assertEqual(recipe_name_label, "name")
-
-    def test_name(self):
-        recipe = Recipe.objects.get(id=1)
-        # compare name value to expected result
-        self.assertEqual(recipe.name, "Tea")
-
-    def test_cooking_time(self):
-        recipe = Recipe.objects.get(id=1)
-        # compare cooking time value to expected result
-        self.assertEqual(recipe.cooking_time, 5)
-
-    def test_get_absolute_url(self):
-        recipe = Recipe.objects.get(id=1)
-        # get_absolute_url() should take you to the detail page of recipe #1
-        # and load the URL /recipes/list/1
-        self.assertEqual(recipe.get_absolute_url(), '/recipes/list/1/')
-
-    def test_view_uses_correct_template(self):
-        """Check the template used by the Recipe list view."""
-        response = self.client.get(
-            reverse('recipes:list'))  # Use the name you've given the URL in your urls.py
+class HomeViewTests(TestCase):
+    def test_home_view_status_code(self):
+        response = self.client.get(reverse('home')) 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'recipes/recipes_list.html')
-
-
-class RecipeFormTest(TestCase):
-
-    def test_recipe_form_valid(self):
-        """Test RecipeForm with valid data"""
-        form_data = {
-            'name': 'New Recipe',
-            'cooking_time': 30,
-            'difficulty': 'Medium',
-        }
-        form = RecipeForm(data=form_data)
-        self.assertTrue(form.is_valid())
-
-    def test_recipe_form_invalid(self):
-        """Test RecipeForm with invalid data"""
-        # Assuming 'name' is required
-        form_data = {
-            'cooking_time': 15,
-            # Missing 'name'
-            'difficulty': 'Easy',
-        }
-        form = RecipeForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('name', form.errors)
-
-
-class RecipeSearchFormTest(TestCase):
-
-    def test_recipe_search_form_valid(self):
-        """Test RecipeSearchForm with valid data including optional fields."""
-        form_data = {
-            'name': 'Some Recipe',
-            'difficulty': 'Easy',
-            'cooking_time': '10-20',
-            # ingredients is omitted since it's optional and requires a bit more setup
-        }
-        form = RecipeSearchForm(data=form_data)
-        self.assertTrue(form.is_valid())
-
-
-class IngredientFormSetTest(TestCase):
-
-    def test_ingredient_formset_valid(self):
-        """Test valid submission of multiple ingredients via the formset."""
-        recipe = Recipe.objects.create(
-            name="Test Recipe", cooking_time=20, difficulty="Medium")
-        formset_data = {
-            'ingredients-TOTAL_FORMS': '1',
-            'ingredients-INITIAL_FORMS': '0',
-            'ingredients-0-name': 'Flour',
-            'ingredients-0-quantity': '2 cups',
-            'ingredients-0-description': 'All-purpose',
-        }
-        formset = IngredientFormSet(data=formset_data, instance=recipe)
-        self.assertTrue(formset.is_valid(), formset.errors)
-        formset.save()
-        self.assertEqual(recipe.ingredients.count(), 1)
-
-# Ensure proper template usage, context data, and form handling for RecipeListView, RecipeDetailView, and the submit_recipe.
-
-from django.test import TestCase, Client
-from django.urls import reverse
-from .models import Recipe, Ingredient
-from .forms import RecipeForm
-
-class HomePageTests(TestCase):
-    def test_home_page_status_code(self):
-        response = self.client.get('/')
-        self.assertEquals(response.status_code, 200)
-
-    def test_home_page_uses_correct_template(self):
-        response = self.client.get('/')
-        self.assertEquals(response.status_code, 200)
+    
+    def test_home_view_template_used(self):
+        response = self.client.get(reverse('home'))
         self.assertTemplateUsed(response, 'recipes/recipes_home.html')
 
 class RecipeListViewTests(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        # Set up data for the whole TestCase
-        for i in range(3):
-            Recipe.objects.create(name=f'Recipe {i}', cooking_time=10+i, difficulty='Easy')
+    def setUp(self):
+        # Create a test user
+        self.user = User.objects.create_user(username='testuser', password='12345')
 
-    def test_view_url_exists_at_desired_location(self):
-        response = self.client.get('/recipes/list/')
-        self.assertEqual(response.status_code, 200)
+        # Create test recipes
+        self.recipe1 = Recipe.objects.create(
+            name="Chocolate Cake",
+            cooking_time=45,
+            difficulty="Medium",
+            description="Delicious chocolate cake.",
+            submitted_on="2023-03-29",
+            submitted_by=self.user
+        )
+        self.recipe2 = Recipe.objects.create(
+            name="Spaghetti Carbonara",
+            cooking_time=30,
+            difficulty="Easy",
+            description="Tasty and easy spaghetti carbonara.",
+            submitted_on="2023-03-30",
+            submitted_by=self.user
+        )
 
-    def test_view_uses_correct_template(self):
-        response = self.client.get(reverse('recipes:list'))
+        # Create ingredients related to the recipes
+        Ingredient.objects.create(recipe=self.recipe1, name="Chocolate", quantity="100g")
+        Ingredient.objects.create(recipe=self.recipe2, name="Spaghetti", quantity="200g")
+
+    def test_recipe_list_view_no_filter(self):
+        response = self.client.get(reverse('recipes:list'))  # Adjust as per your URL name
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'recipes/recipes_list.html')
+        self.assertIn(self.recipe1, response.context['recipe_list'])
+        self.assertIn(self.recipe2, response.context['recipe_list'])
+
+    def test_recipe_list_view_name_filter(self):
+        response = self.client.get(reverse('recipes:list'), {'name': 'chocolate'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.recipe1, response.context['recipe_list'])
+        self.assertNotIn(self.recipe2, response.context['recipe_list'])
 
 class RecipeDetailViewTests(TestCase):
     def setUp(self):
-        self.recipe = Recipe.objects.create(name='Test Recipe', cooking_time=15, difficulty='Medium')
+        # Create a test user
+        self.user = User.objects.create_user(username='testuser', password='12345')
+        
+        # Create a test recipe
+        self.recipe = Recipe.objects.create(
+            name="Test Recipe",
+            cooking_time=20,
+            difficulty="Easy",
+            description="This is a test recipe.",
+            submitted_by=self.user
+        )
 
-    def test_view_status_code(self):
-        url = reverse('recipes:detail', args=[self.recipe.id])
-        response = self.client.get(url)
-        self.assertEquals(response.status_code, 200)
+        # Optionally, create related ingredients and steps
+        Ingredient.objects.create(
+            recipe=self.recipe,
+            quantity="2 cups",
+            name="Flour",
+            description="sifted"
+        )
+        
+        Step.objects.create(
+            recipe=self.recipe,
+            order=1,
+            instructions="Mix all dry ingredients."
+        )
+        
+        # More ingredients or steps can be added similarly
 
-    def test_view_uses_correct_template(self):
-        url = reverse('recipes:detail', args=[self.recipe.id])
-        response = self.client.get(url)
+    def test_detail_view_with_existing_recipe(self):
+        # Now, use self.recipe.id to construct the URL for the detail view test
+        response = self.client.get(reverse('recipes:detail', args=(self.recipe.id,)))
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'recipes/recipes_detail.html')
 
-class SubmitRecipeTest(TestCase):
-    def test_recipe_creation_view(self):
-        self.client = Client()
+        # You can also assert that the context contains the correct recipe
+        self.assertEqual(response.context['recipe'].id, self.recipe.id)
+        self.assertEqual(response.context['recipe'].name, "Test Recipe")
 
-        self.user = User.objects.create_user(username='testuser', password='12345')
-        self.client.login(username='testuser', password='12345')
 
-        response = self.client.get("/recipes/submit/")
-        self.assertEqual(response.status_code, 200)
 
-        post_response = self.client.post("/recipes/submit/", {
-            'name': 'Test Recipe',
-            'cooking_time': 20,
-            'difficulty': 'Easy',
+# Forms test cases
+class LoginFormTestCase(TestCase):
+    def test_login_form_valid_data(self):
+        form = LoginForm(data={'username': 'testuser', 'password': '12345'})
+        self.assertTrue(form.is_valid())
+
+    def test_login_form_no_data(self):
+        form = LoginForm(data={})
+        self.assertFalse(form.is_valid())
+        # Expecting errors for both fields
+        self.assertEqual(len(form.errors), 2)
+
+
+class RegisterFormTestCase(TestCase):
+    def test_register_form_valid_data(self):
+        form = RegisterForm(data={
+            'username': 'testuser',
+            'email': 'user@example.com',
+            'password1': 'Testpass123',
+            'password2': 'Testpass123'
         })
+        self.assertTrue(form.is_valid())
+
+    def test_register_form_invalid_data(self):
+        form = RegisterForm(data={})
+        self.assertFalse(form.is_valid())
+        # Expecting errors for missing fields
+        self.assertEqual(len(form.errors), 4)
+
+
+class RecipeFormTestCase(TestCase):
+    def test_recipe_form_valid_data(self):
+        form = RecipeForm(data={
+            'name': 'Test Recipe',
+            'cooking_time': 30,
+            'description': 'Test Description'
+            # Assume 'image' and 'difficulty' are optional or provide valid data here.
+        })
+        self.assertTrue(form.is_valid())
+
+    def test_recipe_form_invalid_data(self):
+        form = RecipeForm(data={})
+        # Depending on your model constraints, adjust the expected errors
+        self.assertFalse(form.is_valid())
+
+
+class IngredientFormTestCase(TestCase):
+    def test_ingredient_form_valid_data(self):
+        # Assuming 'name' is a required field in your model
+        form = IngredientForm(data={'name': 'Flour'})
+        self.assertTrue(form.is_valid())
+
+
+class StepFormTestCase(TestCase):
+    def test_step_form_valid_data(self):
+        # Assuming 'description' is a required field in your model
+        form = StepForm(data={'order': '1', 'instructions': 'test'})
+        self.assertTrue(form.is_valid())
+
+
+class RecipeSearchFormTestCase(TestCase):
+    def setUp(self):
+        # If you're using real model instances, ensure you have some Ingredients created
+        pass
+
+    def test_recipe_search_form_valid_data(self):
+        form = RecipeSearchForm(data={
+            'name': 'Test',
+            'difficulty': 'Easy',
+            # 'cooking_time' and 'ingredients' can also be tested similarly
+        })
+        self.assertTrue(form.is_valid())

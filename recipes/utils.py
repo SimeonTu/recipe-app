@@ -65,30 +65,34 @@ def categorize_cooking_times(recipes):
 # chart_type: user input o type of chart,
 # data: pandas dataframe
 
-
 def bar_chart_recipe_number_by_difficulty(data):
-    # switch plot backend to AGG (Anti-Grain Geometry) - to write to file
-    # AGG is preferred solution to write PNG files
+    # Switch plot backend to AGG (Anti-Grain Geometry) - to write to file
     plt.switch_backend('AGG')
 
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    # Count the number of recipes by difficulty
-    data['difficulty'].value_counts().plot(
-        kind='bar', color=['skyblue', 'orange', 'green', 'red'], ax=ax)
-    plt.title('Number of Recipes by Difficulty')
+    # Check if 'difficulty' column exists
+    if 'difficulty' in data.columns:
+        # Count the number of recipes by difficulty
+        data['difficulty'].value_counts().plot(
+            kind='bar', color=['skyblue', 'orange', 'green', 'red'], ax=ax)
+        plt.title('Number of Recipes by Difficulty')
+    else:
+        # Plot a default message indicating no data is available
+        plt.text(0.5, 0.5, 'No data available for recipes by difficulty', 
+                 horizontalalignment='center', verticalalignment='center', 
+                 transform = ax.transAxes)
+        plt.title('No Data Available')
+
     plt.xlabel('Difficulty')
     plt.ylabel('Number of Recipes')
-    # elif chart_type == 'pie':
-    #     # For a pie chart example
-    #     data['difficulty'].value_counts().plot(kind='pie', autopct='%1.1f%%', ax=ax)
-    #     plt.title('Recipes Distribution by Difficulty')
-    # else:
-    #     print("Unsupported chart type")
 
     plt.tight_layout()
+
+    # Assuming get_graph() is a function that saves the plot and returns a reference or URL
     chart = get_graph()
     return chart
+
 
 
 def pie_chart_recipes_by_cooking_time(df):
